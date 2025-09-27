@@ -2,9 +2,9 @@
 echo Running Git Push Script for DrLeeWebSLM
 echo ==========================================
 
-echo Setting remote repository to https://github.com/fenago/drleewebslm...
+echo Setting remote repository to https://github.com/LakshmiNarayanaLatchireddi/DrleeWebSLM...
 git remote remove origin 2>nul
-git remote add origin https://github.com/fenago/drleewebslm.git
+git remote add origin https://github.com/LakshmiNarayanaLatchireddi/DrleeWebSLM.git
 
 echo.
 echo Checking current status...
@@ -28,7 +28,7 @@ echo WARNING: This will FORCE PUSH to the repository, potentially overwriting re
 echo This makes the remote repository match your local repository exactly.
 set /p confirm="Are you sure you want to force push? (Y/N): "
 if /i "%confirm%"=="Y" (
-  echo Pushing to GitHub repository: https://github.com/fenago/drleewebslm
+  echo Pushing to GitHub repository: https://github.com/LakshmiNarayanaLatchireddi/DrleeWebSLM
   git push -f -u origin main
 ) else (
   echo Force push canceled.

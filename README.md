@@ -1,7 +1,7 @@
-# DrLee GPT - Small Language Model (Web Edition)
+# LL Gpt
 
 <div align="center">
-  <img src="./public/drlee-ai-logo.png" alt="DrLee AI Logo" width="200">
+  <img src="./public/ll-gpt-logo.svg" alt="LL Gpt Logo" width="200">
 </div>
 
 Run an LLM **entirely in the browser**. Primary path uses **WebLLM + WebGPU**. If WebGPU isn't available, we **fallback to WASM** via **wllama** (no server, no keys).
@@ -9,13 +9,10 @@ Run an LLM **entirely in the browser**. Primary path uses **WebLLM + WebGPU**. I
 ## Features
 - OpenAI-compatible **WebLLM** with **streaming** output
 - **Function calling** demo (local JS function)
-- **Service Worker** caching (static assets + model shards for repeat loads)
 - **PWA** packaging (installable, offline-first UX)
 - **WASM fallback** using **wllama** (single-thread by default to avoid COOP/COEP headers)
 
 ## Installation & Running
-
-### Clone and Setup
 ```bash
 git clone https://github.com/fenago/drleewebslm
 git remote remove origin

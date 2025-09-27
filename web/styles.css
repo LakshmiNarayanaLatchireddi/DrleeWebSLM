@@ -1,27 +1,64 @@
-*{box-sizing:border-box}html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#f8f9fa;color:#1f2937}
-.app{max-width:920px;margin:0 auto;padding:16px}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.title{display:flex;gap:10px;align-items:center}
-.title .dot{width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 12px #22c55e}
-h1{font-size:18px;margin:0;color:#1f2937}
-.actions button{background:#ffffff;color:#1f2937;border:1px solid #e5e7eb;padding:6px 10px;border-radius:8px;cursor:pointer}
-.actions button:hover{background:#f3f4f6}
-.status{font-size:12px;opacity:.9;margin:6px 0;display:flex;gap:8px;align-items:center;color:#374151}
-.badge{background:#f3f4f6;border:1px solid #d1d5db;padding:2px 6px;border-radius:999px;color:#374151}
-.chat{background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;padding:12px;box-shadow:0 10px 20px rgba(0,0,0,.1)}
-.messages{height:60vh;overflow:auto;border-radius:10px;padding:10px;background:#f9fafb;border:1px solid #e5e7eb}
-.msg{display:flex;gap:10px;margin:8px 0}
-.msg .who{width:64px;opacity:.7;font-size:12px;text-align:right;color:#6b7280}
-.msg .bubble{flex:1;background:#ffffff;border:1px solid #e5e7eb;padding:10px;border-radius:12px;white-space:pre-wrap;word-wrap:break-word}
-.msg.assistant .bubble{background:#f0f9ff;border:1px solid #bfdbfe}
-.input-row{display:flex;gap:8px;margin-top:10px}
-.input-row input{flex:1;padding:10px;border-radius:10px;border:1px solid #d1d5db;background:#ffffff;color:#1f2937}
-.input-row button{padding:10px 14px;border-radius:10px;border:1px solid #d1d5db;background:#4f46e5;color:#ffffff;cursor:pointer}
-.input-row button:hover{background:#4338ca}
-.toolrow{margin-top:6px;display:flex;gap:8px}
-dialog{border:none;border-radius:12px;padding:0;overflow:hidden}
-.settings{padding:16px;background:#ffffff;color:#1f2937;display:flex;flex-direction:column;gap:10px;min-width:320px}
-.settings h3{margin:0 0 8px 0}
-.settings label{display:flex;flex-direction:column;gap:6px}
-.settings input,.settings select{padding:8px;border-radius:8px;border:1px solid #d1d5db;background:#f9fafb;color:#1f2937}
-.settings .row{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#1f2937}
+ /* Background: token-stream inspired gradient with subtle grid overlay */
+body{
+   /* Base gradient evoking AI/LLM theme */
+   background:
+     radial-gradient(900px 500px at -10% 20%, rgba(6,182,212,0.18), rgba(6,182,212,0) 55%),
+     linear-gradient(180deg, #0b1220 0%, #0f172a 40%, #0f172a 100%);
+   color:#e5e7eb;
+ }
+ /* Subtle grid overlay to suggest structure/tokens */
+  body::before{
+     content:"";
+     position:fixed;inset:0;pointer-events:none;z-index:0;
+     background-image:
+       linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+       linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+     mask-image: radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,1), rgba(0,0,0,0));
+   }
+ .status{font-size:12px;opacity:.92;margin:6px 0;display:flex;gap:8px;align-items:center;color:#cbd5e1;position:relative;z-index:1}
+ .badge{background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.35);padding:2px 6px;border-radius:999px;color:#e2e8f0}
+ .chat{background:rgba(2,6,23,0.6);border:1px solid rgba(148,163,184,0.25);border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.35);position:relative;z-index:1}
+  .messages{height:60vh;overflow:auto;border-radius:10px;padding:10px;background:linear-gradient(180deg, rgba(15,23,42,0.85), rgba(2,6,23,0.85));border:1px solid rgba(148,163,184,0.25);color:#e5e7eb}
+  .msg{display:flex;gap:10px;margin:8px 0}
+  .msg .bubble{flex:1;background:rgba(2,6,23,0.6);border:1px solid rgba(148,163,184,0.25);padding:10px;border-radius:12px;white-space:pre-wrap;word-wrap:break-word;color:#e5e7eb}
+ .msg.assistant .bubble{background:linear-gradient(180deg, rgba(30,58,138,0.55), rgba(2,6,23,0.6));border:1px solid rgba(59,130,246,0.35)}
+  .input-row{display:flex;gap:8px;margin-top:10px}
+ .input-row input{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(148,163,184,0.35);background:rgba(15,23,42,0.7);color:#e5e7eb}
+ .input-row button{padding:10px 14px;border-radius:10px;border:1px solid rgba(148,163,184,0.35);background:#4f46e5;color:#ffffff;cursor:pointer}
+ .input-row button:hover{background:#4338ca}
+ dialog{border:none;border-radius:12px;padding:0;overflow:hidden}
+ .settings{padding:16px;background:rgba(2,6,23,0.9);color:#e5e7eb;display:flex;flex-direction:column;gap:10px;min-width:320px}
+  .settings h3{margin:0 0 8px 0}
+  .settings label{display:flex;flex-direction:column;gap:6px}
+ .settings input,.settings select{padding:8px;border-radius:8px;border:1px solid rgba(148,163,184,0.35);background:rgba(15,23,42,0.7);color:#e5e7eb}
+ .settings .row{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+
+/* Light theme overrides */
+body.light{
+  background:
+    radial-gradient(1000px 500px at 80% -10%, rgba(99,102,241,0.10), rgba(99,102,241,0) 55%),
+    radial-gradient(800px 400px at -10% 20%, rgba(45,212,191,0.12), rgba(45,212,191,0) 50%),
+    linear-gradient(180deg, #f8fafc 0%, #ffffff 40%, #f8fafc 100%);
+  color:#0f172a;
+}
+body.light::before{
+  background-image:
+    linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+  mask-image: radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,1), rgba(0,0,0,0));
+}
+body.light .title, body.light h1{ color:#0f172a }
+body.light .actions button{ background:#ffffff;color:#0f172a;border:1px solid #e5e7eb }
+body.light .actions button:hover{ background:#f3f4f6 }
+body.light .status{ color:#334155 }
+body.light .badge{ background:#f3f4f6;border:1px solid #d1d5db;color:#334155 }
+body.light .chat{ background:#ffffff;border:1px solid #e5e7eb;box-shadow:0 10px 20px rgba(0,0,0,.08) }
+body.light .messages{ background:#f9fafb;border:1px solid #e5e7eb;color:#0f172a }
+body.light .msg .who{ color:#64748b }
+body.light .msg .bubble{ background:#ffffff;border:1px solid #e5e7eb;color:#0f172a }
+body.light .msg.assistant .bubble{ background:#f0f9ff;border:1px solid #bfdbfe }
+body.light .input-row input{ background:#ffffff;border:1px solid #d1d5db;color:#0f172a }
+body.light .settings{ background:#ffffff;color:#0f172a }
+body.light .settings input, body.light .settings select{ background:#f9fafb;border:1px solid #d1d5db;color:#0f172a }

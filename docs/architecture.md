@@ -1,4 +1,4 @@
-# DrLee GPT Architecture Diagrams
+# LL Gpt Architecture Diagrams
 
 ## High-Level Architecture
 
@@ -90,7 +90,7 @@ graph TD
     subgraph "Progressive Web App"
         MANIFEST[manifest.json<br/>PWA Config]
         SERVICEW[sw.js<br/>Service Worker]
-        ICONS[App Icons<br/>drlee-ai-logo.png]
+        ICONS[App Icons<br/>ll-gpt-logo.svg]
     end
     
     APP --> INIT
@@ -206,7 +206,7 @@ graph LR
 
 ```mermaid
 mindmap
-  root((DrLee GPT))
+  root((LL Gpt))
     Frontend
       HTML5
       CSS3

@@ -1,72 +1,90 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DrLee GPT - Small Language Model (Web Edition)</title>
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./drlee-ai-logo.png">
-  <link rel="apple-touch-icon" href="./drlee-ai-logo.png">
-  <meta name="theme-color" content="#0f172a">
-  <link rel="stylesheet" href="./styles.css">
-</head>
-<body>
-  <div class="app">
-    <header>
-      <div class="title">
-        <img src="./drlee-ai-logo.png" alt="DrLee AI Logo" style="height: 32px; width: auto;">
-        <h1>DrLee GPT - Small Language Model (Web Edition)</h1>
-      </div>
-      <div class="actions">
-        <button id="btn-settings" title="Settings">⚙</button>
-        <button id="btn-clear" title="Clear chat">🧹</button>
-      </div>
-    </header>
-
-    <section id="status" class="status">
-      <span id="runtime-badge" class="badge">Detecting runtime…</span>
-      <span id="init-label">Waiting…</span>
-    </section>
-
-    <main class="chat">
-      <div id="messages" class="messages"></div>
-      <form id="chat-form" class="input-row">
-        <input id="prompt" type="text" placeholder="Ask anything (runs locally)..." autocomplete="off" />
-        <button id="send" type="submit">Send ▸</button>
-      </form>
-      <div class="toolrow">
-        <button id="btn-tool-demo" title="Function call demo">Demo: getTime()</button>
-      </div>
-    </main>
-
-    <dialog id="settings">
-      <form method="dialog" class="settings">
-        <h3>Settings</h3>
-        <label>Model (WebLLM)
-          <select id="model-select">
-            <option value="TinyLlama-1.1B-Chat-v0.4-q4f16_1">TinyLlama 1.1B Chat (q4f16_1)</option>
-            <option value="Phi-2-q4f16_1">Phi-2 (q4f16_1)</option>
-            <option value="Mistral-7B-Instruct-v0.2-q4f16_1">Mistral 7B Instruct (q4f16_1)</option>
-            <option value="Llama-3.1-8B-Instruct">Llama 3.1 8B Instruct</option>
-          </select>
-        </label>
-        <label>Seed <input id="seed" type="number" min="0" step="1" value="0" /></label>
-        <label>Temperature <input id="temperature" type="number" min="0" max="2" step="0.1" value="0.7" /></label>
-        <div class="row">
-          <button id="btn-reload-model" value="default">Reload model</button>
-          <button id="btn-close-settings">Close</button>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LL Gpt</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./ll-gpt-logo.svg">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <div class="title">
+          <img src="./ll-gpt-logo.svg" alt="LL Gpt Logo" style="height: 32px; width: auto;">
+          <h1>LL Gpt</h1>
         </div>
-      </form>
-    </dialog>
-  </div>
+        <div class="actions">
+          <button id="btn-settings" title="Settings">⚙</button>
+          <button id="btn-clear" title="Clear chat">🧹</button>
+          <button id="btn-history" title="History">🕘</button>
+        </div>
+      </header>
 
-  <script type="module" src="./app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(console.error);
-      });
-    }
-  </script>
-</body>
+      <section id="status" class="status">
+        <span id="runtime-badge" class="badge">Detecting runtime…</span>
+        <span id="init-label">Waiting…</span>
+      </section>
+
+      <main class="chat">
+        <div id="messages" class="messages"></div>
+        <form id="chat-form" class="input-row">
+          <input id="prompt" type="text" placeholder="Ask anything (runs locally)..." autocomplete="off" />
+          <button id="send" type="submit">Send ▸</button>
+        </form>
+        <div class="toolrow">
+          <button id="btn-tool-demo" title="Function call demo">Demo: getTime()</button>
+        </div>
+      </main>
+
+      <dialog id="settings">
+        <form method="dialog" class="settings">
+          <h3>Settings</h3>
+          <label>Model (WebLLM)
+            <select id="model-select">
+              <option value="Phi-2-q4f16_1">Phi-2 (q4f16_1)</option>
+              <option value="Mistral-7B-Instruct-v0.2-q4f16_1">Mistral 7B Instruct (q4f16_1)</option>
+              <option value="Llama-3.1-8B-Instruct">Llama 3.1 8B Instruct</option>
+            </select>
+          </label>
+          <label>Seed <input id="seed" type="number" min="0" step="1" value="0" /></label>
+          <label>Temperature <input id="temperature" type="number" min="0" max="2" step="0.1" value="0.7" /></label>
+          <label>Theme
+            <select id="theme-select">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </label>
+          <div class="row">
+            <button id="btn-reload-model" value="default">Reload model</button>
+            <button id="btn-close-settings">Close</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog id="history">
+        <form method="dialog" class="settings history">
+          <h3>History</h3>
+          <input id="history-search" type="search" placeholder="Search history..." style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(148,163,184,0.35);margin:6px 0;" />
+          <div id="history-list" class="history-list"></div>
+          <div class="row">
+            <button id="btn-history-export">Export</button>
+            <button id="btn-history-clear">Clear</button>
+            <button id="btn-history-close">Close</button>
+          </div>
+        </form>
+      </dialog>
+    </div>
+    <script type="module" src="./app.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(console.error);
+        });
+      }
+    </script>
+  </body>
 </html>

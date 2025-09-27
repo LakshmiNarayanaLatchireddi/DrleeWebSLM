@@ -1,32 +1,133 @@
 // app.js — WebLLM primary runtime with WebGPU, WASM fallback via wllama
-
-// CDN ESM endpoints (pin versions for stability)
 const WEBLLM_URL = "https://unpkg.com/@mlc-ai/web-llm@0.2.79?module";
 const WLLAMA_URL = "https://unpkg.com/@wllama/wllama@2.3.5/esm/wasm-from-cdn.js?module";
 
+  const els = {
+    messages: document.getElementById("messages"),
+    prompt: document.getElementById("prompt"),
+    send: document.getElementById("send"),
+    form: document.getElementById("chat-form"),
+    toolBtn: document.getElementById("btn-tool-demo"),
+    initLabel: document.getElementById("init-label"),
+    runtimeBadge: document.getElementById("runtime-badge"),
+    settingsDlg: document.getElementById("settings"),
+    settingsBtn: document.getElementById("btn-settings"),
+    closeSettingsBtn: document.getElementById("btn-close-settings"),
+    modelSelect: document.getElementById("model-select"),
+    reloadModelBtn: document.getElementById("btn-reload-model"),
+    clearBtn: document.getElementById("btn-clear"),
+    themeSelect: document.getElementById("theme-select"),
+    // History elements
+    historyBtn: document.getElementById("btn-history"),
+    historyDlg: document.getElementById("history"),
+    historyList: document.getElementById("history-list"),
+    histExportBtn: document.getElementById("btn-history-export"),
+    histClearBtn: document.getElementById("btn-history-clear"),
+    histCloseBtn: document.getElementById("btn-history-close"),
+    historySearch: document.getElementById("history-search"),
+  };
 
+// --- Core state (was missing) ---
+let engine = null;                   // set by init() depending on runtime
+let runtime = "detecting";           // "webgpu" | "wasm"
+let messages = [
+  { role: "system", content: "You are a concise, helpful assistant that runs 100% locally in the user's browser." }
+];
+let currentModel = (els.modelSelect && els.modelSelect.value) ? els.modelSelect.value : "";
 
-const els = {
-  messages: document.getElementById("messages"),
-  prompt: document.getElementById("prompt"),
-  send: document.getElementById("send"),
-  form: document.getElementById("chat-form"),
-  toolBtn: document.getElementById("btn-tool-demo"),
-  initLabel: document.getElementById("init-label"),
-  runtimeBadge: document.getElementById("runtime-badge"),
-  settingsDlg: document.getElementById("settings"),
-  settingsBtn: document.getElementById("btn-settings"),
-  closeSettingsBtn: document.getElementById("btn-close-settings"),
-  modelSelect: document.getElementById("model-select"),
-  reloadModelBtn: document.getElementById("btn-reload-model"),
-  clearBtn: document.getElementById("btn-clear"),
-};
+// --- Theme handling ---
+const THEME_KEY = "llgpt_theme";
+function applyTheme(theme) {
+  // theme: 'dark' | 'light'
+  const b = document.body;
+  b.classList.remove("light", "dark");
+  b.classList.add(theme === "light" ? "light" : "dark");
+}
+function loadSavedTheme() {
+  return localStorage.getItem(THEME_KEY) || "dark";
+}
+function saveTheme(theme) {
+  try { localStorage.setItem(THEME_KEY, theme); } catch {}
+}
+if (els.themeSelect) {
+  els.themeSelect.addEventListener("change", (e) => {
+    const theme = e.target.value;
+    applyTheme(theme);
+    saveTheme(theme);
+  });
+}
 
-let engine = null;
-let runtime = "detecting"; // "webgpu" | "wasm"
-let messages = [{ role: "system", content: "You are a concise, helpful assistant that runs 100% locally in the user's browser." }];
-let currentModel = els.modelSelect.value;
-
+// --- History handling ---
+const HISTORY_KEY = "llgpt_history";
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+function saveHistory(list) {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); } catch {}
+}
+function deleteHistoryEntry(id) {
+  const list = loadHistory().filter(e => String(e.id) !== String(id));
+  saveHistory(list);
+}
+function addHistoryEntry({ prompt, response, model, runtime }) {
+  const list = loadHistory();
+  const entry = {
+    id: Date.now(),
+    ts: new Date().toISOString(),
+    prompt,
+    response,
+    model,
+    runtime,
+  };
+  list.push(entry);
+  saveHistory(list);
+  renderHistory();
+}
+function renderHistory() {
+  if (!els.historyList) return;
+  const q = (historyFilter || "").toLowerCase();
+  let list = loadHistory();
+  if (q) {
+    list = list.filter(e =>
+      (e.prompt && e.prompt.toLowerCase().includes(q)) ||
+      (e.response && e.response.toLowerCase().includes(q)) ||
+      (e.model && e.model.toLowerCase().includes(q)) ||
+      (e.runtime && e.runtime.toLowerCase().includes(q))
+    );
+  }
+  if (!list.length) {
+    els.historyList.innerHTML = '<div class="empty">No history yet.</div>';
+    return;
+  }
+  const items = [...list].reverse().map((e) => {
+    const resp = (e.response || "").replace(/</g, "&lt;").slice(0, 220);
+    const prm = (e.prompt || "").replace(/</g, "&lt;").slice(0, 140);
+    return `
+      <div class="hist-item" data-id="${e.id}">
+        <div class="meta">
+          <span class="ts">${new Date(e.ts).toLocaleString()}</span>
+          <span class="model">${e.model || ""}</span>
+          <span class="runtime">${e.runtime || ""}</span>
+        </div>
+        <div class="p">Q: ${prm}</div>
+        <div class="r">A: ${resp}${e.response && e.response.length > 220 ? "…" : ""}</div>
+        <div class="row actions">
+          <button class="hist-rerun" data-id="${e.id}">Re-run</button>
+          <button class="hist-copy-q" data-id="${e.id}">Copy Q</button>
+          <button class="hist-copy-a" data-id="${e.id}">Copy A</button>
+          <button class="hist-delete" data-id="${e.id}">Delete</button>
+        </div>
+      </div>`;
+  }).join("");
+  els.historyList.innerHTML = items;
+}
+function getHistoryById(id) {
+  const list = loadHistory();
+  return list.find(e => String(e.id) === String(id));
+}
 // --- UI helpers ---
 function addMsg(who, text) {
   const row = document.createElement("div");
@@ -71,6 +172,12 @@ function toolRouter(name, _args) {
 
 // --- Runtime detection + init ---
 async function init() {
+  // Apply theme early
+  const initialTheme = loadSavedTheme();
+  applyTheme(initialTheme);
+  if (els.themeSelect) {
+    els.themeSelect.value = initialTheme;
+  }
   // Try WebGPU first
   if (navigator.gpu) {
     try {
@@ -163,6 +270,8 @@ async function handleSend(prompt) {
         bubble.textContent = acc;
       }
       messages.push({ role: "assistant", content: acc });
+      // Save to history
+      addHistoryEntry({ prompt, response: acc, model: currentModel, runtime });
     } catch (e) {
       bubble.textContent = "Error: " + e.message;
       console.error(e);
@@ -173,6 +282,8 @@ async function handleSend(prompt) {
     const out = await engine.complete(prompt, { nPredict: 128, temp: 0.7 });
     bubble.textContent = out || "(no output)";
     messages.push({ role: "assistant", content: out || "" });
+    // Save to history
+    addHistoryEntry({ prompt, response: out || "", model: currentModel, runtime });
   } catch (e) {
     bubble.textContent = "Error: " + e.message;
     console.error(e);
@@ -207,6 +318,75 @@ els.reloadModelBtn.addEventListener("click", async (e) => {
 els.clearBtn.addEventListener("click", () => {
   messages = [{ role: "system", content: "You are a concise, helpful assistant that runs 100% locally in the user's browser." }];
   els.messages.innerHTML = "";
+});
+
+// History dialog controls
+if (els.historyBtn && els.historyDlg) {
+  els.historyBtn.addEventListener("click", () => {
+    renderHistory();
+    els.historyDlg.showModal();
+  });
+}
+els.histCloseBtn?.addEventListener("click", () => els.historyDlg?.close());
+els.histClearBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  saveHistory([]);
+  renderHistory();
+});
+els.histExportBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  const data = JSON.stringify(loadHistory(), null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `llgpt-history-${Date.now()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+// Delegate clicks inside history list for Delete and Re-run
+els.historyList?.addEventListener("click", (e) => {
+  const target = e.target;
+  if (!(target instanceof HTMLElement)) return;
+  const item = target.closest('.hist-item');
+  if (!item) return;
+  const id = item.getAttribute('data-id');
+  if (!id) return;
+  if (target.classList.contains('hist-delete')) {
+    e.preventDefault();
+    deleteHistoryEntry(id);
+    renderHistory();
+  } else if (target.classList.contains('hist-rerun')) {
+    e.preventDefault();
+    const entry = getHistoryById(id);
+    if (entry && entry.prompt) {
+      els.historyDlg?.close();
+      els.prompt.value = entry.prompt;
+      handleSend(entry.prompt);
+    }
+  } else if (target.classList.contains('hist-copy-q')) {
+    e.preventDefault();
+    const entry = getHistoryById(id);
+    if (entry) {
+      navigator.clipboard?.writeText(entry.prompt || "");
+    }
+  } else if (target.classList.contains('hist-copy-a')) {
+    e.preventDefault();
+    const entry = getHistoryById(id);
+    if (entry) {
+      navigator.clipboard?.writeText(entry.response || "");
+    }
+  }
+});
+
+// History search filter
+els.historySearch?.addEventListener("input", (e) => {
+  const v = e.target && e.target.value ? String(e.target.value) : "";
+  historyFilter = v;
+  renderHistory();
 });
 
 // Kick off init

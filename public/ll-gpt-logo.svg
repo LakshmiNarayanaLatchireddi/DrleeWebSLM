@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <rect x="16" y="16" width="224" height="224" rx="36" fill="url(#g)" filter="url(#shadow)"/>
+  <g fill="#ffffff" font-family="Inter,Segoe UI,Arial,sans-serif" font-weight="800" text-anchor="middle">
+    <text x="128" y="118" font-size="84" letter-spacing="2">LL</text>
+    <text x="128" y="188" font-size="56" opacity="0.95">Gpt</text>
+  </g>
+</svg>
